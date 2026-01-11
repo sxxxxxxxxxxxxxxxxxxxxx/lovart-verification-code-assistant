@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lovart 验证码助手 | NiMail</title>
+    <meta name="description" content="专业版 Lovart 临时邮箱验证码获取工具">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📨</text></svg>">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            background-color: var(--bg-body);
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 24px 24px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+        }
+
+        /* 品牌头部 */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 16px;
+            font-size: 32px;
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .brand-subtitle {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* 主卡片 */
+        .main-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.6);
+            backdrop-filter: blur(12px);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* 邮箱显示区 */
+        .email-box {
+            position: relative;
+            background: #f9fafb;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .email-box:focus-within {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .email-content {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .email-content.placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .copy-btn-mini {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 12px;
+            display: none; /* JS控制显示 */
+        }
+
+        .copy-btn-mini:hover {
+            border-color: var(--text-sub);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        /* 主按钮 */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 状态区域 */
+        .status-wrapper {
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: none; /* JS控制 */
+        }
+
+        .status-wrapper.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sub);
+        }
+
+        /* 状态变体 */
+        .listening .status-dot {
+            background: #fbbf24;
+            box-shadow: 0 0 0 4px #fef3c7;
+            animation: pulse 2s infinite;
+        }
+        .listening .status-text { color: #d97706; }
+
+        .success .status-dot {
+            background: var(--success);
+            box-shadow: 0 0 0 4px var(--success-light);
+        }
+        .success .status-text { color: var(--success); }
+
+        .error .status-dot {
+            background: #ef4444;
+            box-shadow: 0 0 0 4px #fee2e2;
+        }
+        .error .status-text { color: #ef4444; }
+
+        /* 验证码展示 */
+        .code-zone {
+            background: var(--success-light);
+            border: 1px solid #6ee7b7;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-zone.show {
+            display: block;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .code-title {
+            font-size: 12px;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .code-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 42px;
+            font-weight: 800;
+            color: #047857;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .code-value:hover {
+            transform: scale(1.05);
+        }
+
+        .code-tip {
+            font-size: 12px;
+            color: #059669;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* 历史记录卡片 */
+        .history-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            padding: 20px 0;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+        .history-item:hover .h-code { color: var(--primary); }
+
+        .h-info { display: flex; flex-direction: column; gap: 2px; }
+        .h-email { font-size: 13px; color: var(--text-sub); font-family: monospace; }
+        .h-time { font-size: 11px; color: #9ca3af; }
+        .h-code { 
+            font-family: monospace; 
+            font-weight: 700; 
+            font-size: 16px; 
+            color: var(--text-main);
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1f2937;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon { font-size: 16px; }
+
+        /* 动画定义 */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .main-card { padding: 24px; }
+            .code-value { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 品牌头部 -->
+        <div class="brand-header">
+            <div class="brand-logo">📨</div>
+            <h1 class="brand-title">Lovart 验证码助手</h1>
+            <p class="brand-subtitle">NiMail 专用通道 · 极速获取 · 自动解析</p>
+        </div>
+
+        <!-- 主操作卡片 -->
+        <div class="main-card">
+            <label class="label">临时邮箱地址</label>
+            <div class="email-box">
+                <div class="email-content placeholder" id="emailText">等待生成...</div>
+                <button class="copy-btn-mini" id="copyBtn" onclick="copyEmail()">复制</button>
+            </div>
+
+            <button class="action-btn" id="generateBtn" onclick="generateAndListen()">
+                <span class="btn-icon">⚡</span>
+                <span id="btnText">生成并监听</span>
+            </button>
+
+            <!-- 状态与结果区域 -->
+            <div class="status-wrapper" id="statusBox">
+                <!-- 状态指示器 -->
+                <div class="status-indicator listening" id="statusIndicator">
+                    <div class="status-dot"></div>
+                    <div class="status-text" id="statusText">准备就绪</div>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #9ca3af; margin-bottom: 12px;" id="statusDetail"></div>
+
+                <!-- 验证码大字展示 -->
+                <div class="code-zone" id="codeDisplay" onclick="copyCode()">
+                    <div class="code-title">Verification Code</div>
+                    <div class="code-value" id="codeNumber"></div>
+                    <div class="code-tip">点击验证码自动复制</div>
+                </div>
+                
+                <!-- 手动跳转链接（隐藏） -->
+                <a href="#" target="_blank" id="nimailLink" style="display:none;"></a>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="history-card">
+            <div class="label">最近记录</div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty">暂无数据</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✨</span>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        let currentEmail = '';
+        let currentCode = '';
+        let pollingInterval = null;
+        let pollingCount = 0;
+        const MAX_POLLING_COUNT = 60;
+        let history = [];
+
+        async function init() {
+            loadHistory();
+            console.log('✅ Lovart 验证码助手已就绪');
+        }
+
+        async function applyEmail() {
+            const response = await fetch('/api/apply');
+            return await response.json();
+        }
+
+        async function generateAndListen() {
+            const generateBtn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            
+            generateBtn.disabled = true;
+            btnText.textContent = '正在连接 NiMail...';
+
+            try {
+                const data = await applyEmail();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '申请失败');
+                }
+                
+                currentEmail = data.email;
+                currentCode = '';
+                
+                // 更新UI
+                const emailText = document.getElementById('emailText');
+                emailText.textContent = currentEmail;
+                emailText.classList.remove('placeholder');
+                document.getElementById('copyBtn').style.display = 'inline-flex';
+
+                // 显示状态栏
+                const statusBox = document.getElementById('statusBox');
+                statusBox.classList.add('show');
+                
+                updateStatus('listening', '正在监听邮件...', '等待 Lovart 发送验证码 (0/60)');
+                
+                // 重置验证码显示
+                document.getElementById('codeDisplay').classList.remove('show');
+
+                pollingCount = 0;
+                startPolling();
+
+                btnText.textContent = '重置 / 生成新邮箱';
+                generateBtn.disabled = false;
+                
+                // 自动复制邮箱体验
+                copyEmail();
+                
+            } catch (error) {
+                console.error('生成邮箱失败:', error);
+                showToast('❌ 生成失败，请重试');
+                btnText.textContent = '生成并监听';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            queryCode();
+            pollingInterval = setInterval(() => {
+                pollingCount++;
+                if (pollingCount >= MAX_POLLING_COUNT) {
+                    stopPolling();
+                    updateStatus('error', '监听超时', '未收到邮件，请重新生成');
+                    return;
+                }
+                queryCode();
+            }, 3000);
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        async function queryCode() {
+            if (!currentEmail) return;
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`/api/getcode?email=${encodeURIComponent(currentEmail)}`);
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+                if (data.success) {
+                    stopPolling();
+                    currentCode = data.code;
+                    
+                    updateStatus('success', '验证码提取成功', `耗时 ${elapsed}s`);
+                    
+                    const codeDisplay = document.getElementById('codeDisplay');
+                    document.getElementById('codeNumber').textContent = data.code;
+                    codeDisplay.classList.add('show');
+
+                    addHistory(currentEmail, data.code);
+                    showToast('🎉 验证码已获取！');
+                    
+                    // 尝试自动复制验证码
+                    copyCode();
+                    
+                } else if (data.needManual) {
+                    const detail = `已检测到邮件，正在尝试深度解析... (${pollingCount})`;
+                    updateStatus('listening', '解析中...', detail);
+                } else {
+                    const detail = `正在轮询收件箱... (${pollingCount}/${MAX_POLLING_COUNT})`;
+                    updateStatus('listening', '等待邮件...', detail);
+                }
+            } catch (error) {
+                console.error('查询出错:', error);
+            }
+        }
+
+        function updateStatus(type, text, detail) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const statusDetail = document.getElementById('statusDetail');
+
+            indicator.className = `status-indicator ${type}`;
+            statusText.textContent = text;
+            statusDetail.textContent = detail || '';
+        }
+
+        function copyEmail() {
+            if (currentEmail) {
+                navigator.clipboard.writeText(currentEmail).then(() => {
+                    showToast('📋 邮箱已复制');
+                });
+            }
+        }
+
+        function copyCode() {
+            if (currentCode) {
+                navigator.clipboard.writeText(currentCode).then(() => {
+                    showToast('✅ 验证码已复制');
+                });
+            }
+        }
+
+        function addHistory(email, code) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            history = [{ email, code, time: timeStr }, ...history.slice(0, 9)];
+            localStorage.setItem('lovartMailHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('lovartMailHistory');
+            if (saved) {
+                try { history = JSON.parse(saved); } catch (e) { history = []; }
+            }
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            if (history.length === 0) {
+                container.innerHTML = '<div class="history-empty">暂无查询记录</div>';
+            } else {
+                container.innerHTML = history.map(h => `
+                    <div class="history-item" onclick="copyHistoryCode('${h.code}')">
+                        <div class="h-info">
+                            <div class="h-email">${h.email}</div>
+                            <div class="h-time">${h.time}</div>
+                        </div>
+                        <div class="h-code">${h.code}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function copyHistoryCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('📋 历史验证码已复制');
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        init();
+        window.addEventListener('beforeunload', () => stopPolling());
+    </script>
+</body>
+</html>
