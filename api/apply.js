@@ -1,16 +1,4 @@
-const crypto = require('crypto');
-
-// 生成随机邮箱名
-function generateRandomEmail() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result + '@nimail.cn';
-}
-
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -21,7 +9,14 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const email = generateRandomEmail();
+        // 生成随机邮箱
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let emailName = '';
+        for (let i = 0; i < 8; i++) {
+            emailName += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const email = emailName + '@nimail.cn';
+        
         const body = `mail=${encodeURIComponent(email)}`;
         
         const response = await fetch('https://www.nimail.cn/api/applymail', {
@@ -51,5 +46,4 @@ module.exports = async (req, res) => {
             error: error.message 
         });
     }
-};
-
+}
